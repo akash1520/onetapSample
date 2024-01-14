@@ -1,0 +1,10 @@
+.in-game-container {
+  overflow: hidden;
+  max-height: 400px;
+  max-width: 350px;
+}
+
+.header {
+  background: #201c33;
+  grid-area: header;
+}
