@@ -1,17 +1,19 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface OverwolfEventPayload {
-  event: ValorantOverwolfGEP.Event[]
+  event: ValorantOverwolfGEP.Event[]|RocketLeagueOverwolfGEP.Event[]
 }
 interface OverwolfInfoPayload {
-  info: ValorantOverwolfGEP.Info
+  info: ValorantOverwolfGEP.Info|RocketLeagueOverwolfGEP.Info
 }
 interface BackgroundState {
-  event: ValorantOverwolfGEP.Event[]
-  info: ValorantOverwolfGEP.Info
+  event: ValorantOverwolfGEP.Event[]|RocketLeagueOverwolfGEP.Event[]
+  info: ValorantOverwolfGEP.Info|RocketLeagueOverwolfGEP.Info
 
-  events: ValorantOverwolfGEP.Event[][]
-  infos: ValorantOverwolfGEP.Info[]
+  events: ValorantOverwolfGEP.Event[][]|RocketLeagueOverwolfGEP.Event[][]
+  infos: ValorantOverwolfGEP.Info[]|RocketLeagueOverwolfGEP.Info[]
+  
+  error:string
 }
 
 const initialState: BackgroundState = {
@@ -19,6 +21,7 @@ const initialState: BackgroundState = {
   info: {},
   events: [],
   infos: [],
+  error:""
 }
 
 const backgroundWindowSlice = createSlice({
@@ -34,10 +37,12 @@ const backgroundWindowSlice = createSlice({
       const { info } = action.payload
       state.info = info
       state.infos.push(info)
-    },
+    },setError(state, action:PayloadAction<string>){
+      state.error=action.payload
+    }
   },
 })
 
-export const { setEvent, setInfo } = backgroundWindowSlice.actions
+export const { setEvent, setInfo, setError } = backgroundWindowSlice.actions
 
 export default backgroundWindowSlice.reducer

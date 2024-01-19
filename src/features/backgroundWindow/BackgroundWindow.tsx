@@ -1,70 +1,116 @@
-import { useCallback, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
-import { setEvent, setInfo } from './backgroundSlice'
-import { useWindow, useGameEventProvider, useRunningGame } from 'overwolf-hooks'
+import { useCallback, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { setError, setEvent, setInfo } from "./backgroundSlice";
+import {
+  useWindow,
+  useGameEventProvider,
+  useRunningGame,
+} from "overwolf-hooks";
 import {
   WINDOW_NAMES,
-  REQUIRED_FEATURES,
+  REQUIRED_FEATURES_VALORANT,
   OVERWOLF_HOOKS_OPTIONS,
-} from 'app/constants'
+  REQUIRED_FEATURES_ROCKET_LEAGUE,
+} from "app/constants";
+import { supabase } from "app/App";
 
-const { DESKTOP, INGAME } = WINDOW_NAMES
+const { DESKTOP, INGAME } = WINDOW_NAMES;
 
 //Valorant Game Event Provider
 enum Game {
-  'Valorant' = 21640,
-  'Apex_Legends'= 21566
+  "Valorant" = 21640,
+  "Rocket_League" = 10798,
 }
 
 const BackgroundWindow = () => {
-  const [currentGame] = useRunningGame(OVERWOLF_HOOKS_OPTIONS)
-  const [desktopWindow] = useWindow(DESKTOP, OVERWOLF_HOOKS_OPTIONS)
-  const [ingameWindow] = useWindow(INGAME, OVERWOLF_HOOKS_OPTIONS)
+  const [currentGame] = useRunningGame(OVERWOLF_HOOKS_OPTIONS);
+  const [desktopWindow] = useWindow(DESKTOP, OVERWOLF_HOOKS_OPTIONS);
+  const [ingameWindow] = useWindow(INGAME, OVERWOLF_HOOKS_OPTIONS);
   const [{ event, info }, setGameFeatures] = useGameEventProvider<
-    ValorantOverwolfGEP.Info,
-    ValorantOverwolfGEP.Event
-  >(OVERWOLF_HOOKS_OPTIONS)
+    ValorantOverwolfGEP.Info | RocketLeagueOverwolfGEP.Info,
+    ValorantOverwolfGEP.Event | RocketLeagueOverwolfGEP.Event
+  >(OVERWOLF_HOOKS_OPTIONS);
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const openStartupWindow = useCallback(() => {
-    
-    var availableGame=false;
+    var availableGame = false;
 
-    switch(currentGame?.id) {
+    switch (currentGame?.id) {
       case Game.Valorant:
-        availableGame=true;
+        availableGame = true;
+        setGameFeatures(REQUIRED_FEATURES_VALORANT);
         break;
-      case Game.Apex_Legends:
-        availableGame=true;
+      case Game.Rocket_League:
+        availableGame = true;
+        setGameFeatures(REQUIRED_FEATURES_ROCKET_LEAGUE);
         break;
       default:
+        availableGame = false;
         break;
     }
 
+    let currentWindow;
 
-    const gameRunning =
-      availableGame &&
-      (currentGame?.gameRunning || currentGame?.gameChanged)
-    const currentWindow = gameRunning ? ingameWindow : desktopWindow
-    gameRunning && setGameFeatures(REQUIRED_FEATURES)
+    if (availableGame) {
+      if (currentGame?.gameRunning || currentGame?.gameChanged) {
+        // currentWindow = ingameWindow;
+        currentWindow = desktopWindow;
+      } else {
+        currentWindow = desktopWindow;
+      }
+    }
 
-    currentWindow?.restore()
-  }, [desktopWindow, ingameWindow, currentGame, setGameFeatures])
-
-  useEffect(() => {
-    event && dispatch(setEvent({ event }))
-  }, [event, dispatch])
-
-  useEffect(() => {
-    info && dispatch(setInfo({ info }))
-  }, [info, dispatch])
+    currentWindow?.restore();
+  }, [desktopWindow, ingameWindow, currentGame, setGameFeatures]);
 
   useEffect(() => {
-    openStartupWindow()
-  }, [openStartupWindow])
+    async function save_event() {
+      try {
+        const { error } = await supabase
+          .from("event_info")
+          .insert([
+            { event_text: JSON.stringify(event, null, 2), info_text: " " },
+          ]);
 
-  return <></>
-}
+        if (error) dispatch(setError(error.message))
 
-export default BackgroundWindow
+        dispatch(setError("Data successfully interested"))
+      } catch (error) {
+        dispatch(setError("Error encountered!"))
+      }
+    }
+
+    event && dispatch(setEvent({ event }));
+    event && save_event();
+  }, [event, dispatch]);
+
+  useEffect(() => {
+    async function save_info() {
+      try {
+        const { error } = await supabase
+          .from("event_info")
+          .insert([
+            { event_text: " ", info_text: JSON.stringify(info, null, 2) },
+          ]);
+
+        if (error) dispatch(setError(error.message))
+
+        dispatch(setError("Data successfully interested"))
+      } catch (error) {
+        dispatch(setError("Error encountered!"))
+      }
+    }
+
+    info && dispatch(setInfo({ info }));
+    info && save_info();
+  }, [info, dispatch]);
+
+  useEffect(() => {
+    openStartupWindow();
+  }, [openStartupWindow]);
+
+  return <></>;
+};
+
+export default BackgroundWindow;

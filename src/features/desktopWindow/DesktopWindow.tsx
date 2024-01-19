@@ -7,7 +7,7 @@ import './DesktopWindow.module.css'
 import { DesktopHeader } from './DesktopHeader'
 
 const DesktopWindow = () => {
-  const { event, info } = useSelector((state: RootReducer) => state.background)
+  const { event, info, error } = useSelector((state: RootReducer) => state.background)
 
   useEffect(() => {
     console.info(
@@ -28,7 +28,7 @@ const DesktopWindow = () => {
   return (
     <div className="in-game-container">
       <DesktopHeader/>
-      <Title color="white">In Game Window</Title>
+      <Title color="white">Desktop Game Window</Title>
       <Feed
         title="Events"
         data={event.length ? event[0] : { content: 'No events yet' }}
@@ -37,6 +37,7 @@ const DesktopWindow = () => {
         title="Infos"
         data={Object.keys(info).length ? info : { content: 'No infos yet' }}
       />
+      <div className='errorClass'>Error: {error}</div>
     </div>
   )
 }

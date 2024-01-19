@@ -8,3 +8,8 @@
   background: #201c33;
   grid-area: header;
 }
+
+.errorClass{
+  text-decoration: white;
+  color: white;
+}

@@ -1,9 +1,14 @@
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react';
+import { createClient } from '@supabase/supabase-js'
 import { CurrentPage } from './CurrentPage'
 import { Loading } from 'components/Loading'
 import { WINDOW_NAMES } from './constants'
 import { getCurrentWindow } from 'utils'
 import './App.css'
+
+const supabase_url = "https://ullmkehpatobgmwxzlah.supabase.co"
+const supabase_key ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVsbG1rZWhwYXRvYmdtd3h6bGFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDU1ODA5NTksImV4cCI6MjAyMTE1Njk1OX0.M_h2KO61YHgSpUtYILt-rzV6XheAjE70AFJ8wVNR-So"
+export const supabase = createClient(supabase_url,supabase_key)
 
 //This is the main component of the app, it is the root of the app
 //each Page component is rendered in a different window
